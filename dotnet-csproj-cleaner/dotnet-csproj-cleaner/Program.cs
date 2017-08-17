@@ -60,7 +60,7 @@ namespace dotnet_csproj_cleaner
                     }
                     if (!fileIsChanged)
                     {
-                        Console.WriteLine(String.Format("File {0} not changed", args[0]));
+                        Console.WriteLine(String.Format("File {0} - OK", args[0]));
                         return;
                     }
                     using (FileStream writer = new FileStream(args[0], FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite))
