@@ -19,6 +19,7 @@ namespace dotnet_csproj_cleaner
                 return;
             }
             using (FileStream fs = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
                 try
                 {
                     bool fileIsChanged = false;
@@ -63,14 +64,17 @@ namespace dotnet_csproj_cleaner
                         return;
                     }
                     using (FileStream writer = new FileStream(args[0], FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite))
+                    {
                         xmldoc.Save(writer);
+                    }
                     Console.WriteLine(String.Format("File {0} changed", args[0]));
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
-            
+            }
+
         }
 
     }
