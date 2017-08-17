@@ -67,7 +67,7 @@ namespace dotnet_csproj_cleaner
                     {
                         xmldoc.Save(writer);
                     }
-                    Console.WriteLine(String.Format("File {0} changed", args[0]));
+                    Console.WriteLine(String.Format("File {0} has been successfully updated", args[0]));
                 }
                 catch (Exception ex)
                 {
