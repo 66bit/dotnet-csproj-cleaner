@@ -18,59 +18,59 @@ namespace dotnet_csproj_cleaner
                 Console.WriteLine("File not found");
                 return;
             }
-            FileStream fs = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            try
-            {
-                bool fileIsChanged = false;
-                XmlDocument xmldoc = new XmlDocument();
-                xmldoc.Load(fs);
-                var root = xmldoc.FirstChild;
-                var rootChilds = root.ChildNodes;
-                for (int i = 0; i < rootChilds.Count; i++)
+            using (FileStream fs = new FileStream(args[0], FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                try
                 {
-                    if (rootChilds[i].Name == "ItemGroup")
+                    bool fileIsChanged = false;
+                    XmlDocument xmldoc = new XmlDocument();
+                    xmldoc.Load(fs);
+                    var root = xmldoc.FirstChild;
+                    var rootChilds = root.ChildNodes;
+                    for (int i = 0; i < rootChilds.Count; i++)
                     {
-                        for (int j = 0; j < rootChilds[i].ChildNodes.Count; j++)
+                        if (rootChilds[i].Name == "ItemGroup")
                         {
-                            bool isContent = rootChilds[i].ChildNodes[j].Name == "Content";
-                            if (!isContent)
+                            for (int j = 0; j < rootChilds[i].ChildNodes.Count; j++)
                             {
-                                continue;
-                            }
-                            bool containsInclude = rootChilds[i].ChildNodes[j].Attributes["Include"] != null;
-                            if (!containsInclude)
-                            {
-                                continue;
-                            }
-                            bool isNeedInclude = rootChilds[i].ChildNodes[j].Attributes["Include"].Value.TrimStart(@"\/".ToCharArray()).StartsWith("wwwroot");
-                            if (isNeedInclude)
-                            {
-                                rootChilds[i].RemoveChild((rootChilds[i].ChildNodes[j]));
-                                fileIsChanged = true;
-                                j--;
-                            }
-                            if (rootChilds[i].ChildNodes.Count == 0 || j == -1)
-                            {
-                                root.RemoveChild(rootChilds[i]);
-                                break;
+                                bool isContent = rootChilds[i].ChildNodes[j].Name == "Content";
+                                if (!isContent)
+                                {
+                                    continue;
+                                }
+                                bool containsInclude = rootChilds[i].ChildNodes[j].Attributes["Include"] != null;
+                                if (!containsInclude)
+                                {
+                                    continue;
+                                }
+                                bool isRemoving = rootChilds[i].ChildNodes[j].Attributes["Include"].Value.TrimStart(@"\/".ToCharArray()).StartsWith("wwwroot");
+                                if (isRemoving)
+                                {
+                                    rootChilds[i].RemoveChild((rootChilds[i].ChildNodes[j]));
+                                    fileIsChanged = true;
+                                    j--;
+                                }
+                                if (rootChilds[i].ChildNodes.Count == 0 || j == -1)
+                                {
+                                    root.RemoveChild(rootChilds[i]);
+                                    break;
+                                }
                             }
                         }
                     }
+                    if (!fileIsChanged)
+                    {
+                        Console.WriteLine(String.Format("File {0} not changed", args[0]));
+                        return;
+                    }
+                    using (FileStream writer = new FileStream(args[0], FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite))
+                        xmldoc.Save(writer);
+                    Console.WriteLine(String.Format("File {0} changed", args[0]));
                 }
-                fs.Flush();
-                if (!fileIsChanged)
+                catch (Exception ex)
                 {
-                    Console.WriteLine("File not changed");
-                    return;
+                    Console.WriteLine(ex.Message);
                 }
-                FileStream writer = new FileStream(args[0], FileMode.Truncate, FileAccess.Write, FileShare.ReadWrite);
-                xmldoc.Save(writer);
-                writer.Flush();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+            
         }
 
     }
